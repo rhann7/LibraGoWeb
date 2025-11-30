@@ -1,88 +1,77 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'Dashboard Saya')
 
 @section('content')
-<div class="space-y-8">
+<div class="flex flex-col gap-6">
+    
+    <div class="flex justify-between items-end">
+        <h1 class="text-2xl font-bold">Halo, {{ Auth::user()->name }}</h1>
+        <a href="{{ route('books.index') }}" class="underline">Jelajahi Katalog</a>
+    </div>
 
-    <h1 class="text-2xl font-bold">Halo, {{ Auth::user()->name }}!</h1>
-
-    <div class="border p-6 rounded bg-gray-50">
-        <h2 class="text-xl font-bold mb-4">Sedang Dibaca</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         
-        @if($currentRead)
-            <div class="flex gap-4">
-                <div class="w-24 h-32 bg-gray-300 flex items-center justify-center">
-                    @if($currentRead->license->book->cover)
-                        <img src="{{ asset('storage/' . $currentRead->license->book->cover) }}" class="w-full h-full object-cover">
-                    @else
-                        No Cover
-                    @endif
-                </div>
-                
+        <div class="md:col-span-2 border p-4 flex gap-4 items-center h-32">
+            @if($currentRead)
+                <div class="w-16 h-24 border flex items-center justify-center text-xs">Img</div>
                 <div>
-                    <h3 class="text-lg font-bold">{{ $currentRead->license->book->title }}</h3>
-                    <p>Penulis: {{ $currentRead->license->book->author->name }}</p>
-                    <p class="mt-2">Halaman Terakhir: <strong>{{ $currentRead->last_page }}</strong></p>
-                    
-                    <div class="mt-4">
-                        <a href="{{ route('loans.store', $currentRead->license->book->slug) }}" class="bg-blue-500 text-white px-4 py-2 rounded">
-                            Lanjut Baca
-                        </a>
-                    </div>
+                    <div class="text-xs uppercase font-bold mb-1">Sedang Dibaca</div>
+                    <div class="font-bold truncate">{{ $currentRead->license->book->title }}</div>
+                    <a href="{{ route('loans.store', $currentRead->license->book->slug) }}" class="text-sm underline mt-2 block">Lanjut Baca</a>
                 </div>
+            @else
+                <div class="flex items-center justify-center w-full">
+                    <span>Belum ada buku aktif. <a href="{{ route('books.index') }}" class="underline">Cari</a></span>
+                </div>
+            @endif
+        </div>
+
+        <div class="border p-4 flex flex-col justify-between h-32">
+            <span>Buku Tamat</span>
+            <span class="text-3xl font-bold">{{ $stats['books_read'] }}</span>
+        </div>
+        <div class="border p-4 flex flex-col justify-between h-32">
+            <span>Koleksi (Fav/Bookmark)</span>
+            <span class="text-3xl font-bold">{{ $stats['favorites'] + $stats['bookmarks'] }}</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-2 border">
+            <div class="p-4 border-b flex justify-between">
+                <span class="font-bold">Riwayat Terakhir</span>
+                <a href="{{ route('histories.index') }}" class="text-sm underline">Semua</a>
             </div>
-        @else
-            <p>Kamu sedang tidak membaca buku apapun.</p>
-            <a href="{{ route('books.index') }}" class="text-blue-500 underline">Cari buku di katalog</a>
-        @endif
-    </div>
-
-    <div class="grid grid-cols-3 gap-4">
-        <div class="border p-4 rounded text-center">
-            <h3>Buku Tamat</h3>
-            <p class="text-2xl font-bold">{{ $myStats['books_read'] }}</p>
-        </div>
-        <div class="border p-4 rounded text-center">
-            <h3>Favorit</h3>
-            <p class="text-2xl font-bold">{{ $myStats['favorites'] }}</p>
-        </div>
-        <div class="border p-4 rounded text-center">
-            <h3>Bookmarks</h3>
-            <p class="text-2xl font-bold">{{ $myStats['bookmarks'] }}</p>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-8">
-        <div class="border p-4 rounded">
-            <h2 class="text-lg font-bold mb-3">Riwayat Bacaan Terakhir</h2>
-            @forelse($recentHistories as $history)
-                <div class="mb-3 border-b pb-2">
-                    <p class="font-bold">{{ $history->license->book->title }}</p>
-                    <p class="text-sm text-gray-500">Selesai: {{ $history->returned_date->format('d M Y') }}</p>
-                </div>
-            @empty
-                <p class="text-gray-500">Belum ada riwayat.</p>
-            @endforelse
-            <a href="{{ route('histories.index') }}" class="text-sm text-blue-500 underline">Lihat Semua</a>
-        </div>
-
-        <div class="border p-4 rounded">
-            <h2 class="text-lg font-bold mb-3">Wishlist (Ingin Dibaca)</h2>
-            @forelse($wishlist as $book)
-                <div class="mb-3 border-b pb-2 flex justify-between items-center">
-                    <div>
-                        <p class="font-bold">{{ $book->title }}</p>
-                        <p class="text-sm text-gray-500">{{ $book->author->name }}</p>
+            <div class="p-4 flex flex-col gap-4">
+                @foreach($recentHistories as $history)
+                <div class="flex gap-3 items-center border-b pb-2 last:border-0">
+                    <div class="w-12 h-16 border flex items-center justify-center text-xs">Img</div>
+                    <div class="flex-1">
+                        <div class="font-bold">{{ $history->license->book->title }}</div>
+                        <div class="text-sm">Selesai: {{ $history->returned_date->format('d M Y') }}</div>
                     </div>
-                    <a href="{{ route('loans.store', $book->slug) }}" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Baca</a>
                 </div>
-            @empty
-                <p class="text-gray-500">Wishlist kosong.</p>
-            @endforelse
-            <a href="{{ route('wishlists.index') }}" class="text-sm text-blue-500 underline">Lihat Semua</a>
+                @endforeach
+            </div>
         </div>
-    </div>
 
+        <div class="lg:col-span-1 border">
+            <div class="p-4 border-b font-bold">Ingin Dibaca</div>
+            <div class="p-4 flex flex-col gap-4">
+                @foreach($wishlist as $book)
+                <div class="flex gap-3 items-center">
+                    <div class="w-12 h-16 border flex items-center justify-center text-xs">Img</div>
+                    <div class="flex-1 overflow-hidden">
+                        <div class="font-bold truncate">{{ $book->title }}</div>
+                        <a href="{{ route('loans.store', $book->slug) }}" class="text-sm underline">Pinjam</a>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
+    </div>
 </div>
 @endsection

@@ -11,7 +11,7 @@ class HistoryController extends Controller
     public function index()
     {
         $histories = Auth::user()->loans()->with(['license.book.category', 'license.book.author'])->whereNotNull('returned_date')->latest('returned_date')->paginate(12);
-        return view('history.index', compact('histories'));
+        return view('histories.index', compact('histories'));
     }
 
     public function show(Loan $loan)
@@ -30,6 +30,6 @@ class HistoryController extends Controller
             'syntax' => CarbonInterface::DIFF_ABSOLUTE, 'parts' => 2
         ]);
 
-        return view('history.show', compact('loan', 'duration'));
+        return view('histories.show', compact('loan', 'duration'));
     }
 }

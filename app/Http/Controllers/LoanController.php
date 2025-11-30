@@ -25,7 +25,7 @@ class LoanController extends Controller
             return back()->with('error', 'Buku tidak tersedia.');
         }
 
-        $license->update();
+        $license->update(['status' => 'borrowed']);
 
         $newLoan = Loan::create([
             'user_id'       => $user->id,

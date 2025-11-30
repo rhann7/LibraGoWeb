@@ -2,6 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\Category;
+use App\Models\License;
+use App\Models\Publisher;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -28,5 +33,25 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role'     => 'user'
         ]);
+
+        $categories = Category::factory(5)->create();
+        $authors    = Author::factory(10)->create(); 
+        $publishers = Publisher::factory(5)->create();
+
+        for ($i = 0; $i < 20; $i++) {
+            $book = Book::factory()->create([
+                'category_id'  => $categories->random()->id,
+                'author_id'    => $authors->random()->id,
+                'publisher_id' => $publishers->random()->id,
+            ]);
+
+            $jumlahStok = rand(3, 5);
+            for ($j = 0; $j < $jumlahStok; $j++) {
+                License::create([
+                    'book_id' => $book->id,
+                    'status'  => 'available'
+                ]);
+            }
+        }
     }
 }
